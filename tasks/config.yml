@@ -1,0 +1,23 @@
+---
+- name: Deploy systemd file
+  ansible.builtin.template:
+    src: "templates/pgfga.service.j2"
+    dest: "/etc/systemd/system/pgfga.service"
+    mode: "0600"
+
+- name: Deploy config file
+  ansible.builtin.template:
+    src: "templates/pgfga_config.yaml.j2"
+    dest: "{{ pgfga_configdir }}/config.yaml"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+# Restart kan wel met pgfga
+- name: "Start pgfga service"
+  become: true
+  ansible.builtin.systemd:
+    name: pgfga.service
+    state: restarted
+    enabled: "true"
+    daemon_reload: "true"

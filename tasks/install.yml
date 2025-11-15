@@ -1,0 +1,80 @@
+---
+- name: "Create pgfga_osgroup"
+  ansible.builtin.group:
+    name: "{{ pgfga_osgroup }}"
+    system: "true"
+    state: present
+
+- name: "Create pgfga_user"
+  ansible.builtin.user:
+    name: "{{ pgfga_osuser }}"
+    group: "{{ pgfga_osgroup }}"
+    create_home: "true"
+    system: "true"
+    state: present
+
+- name: Get user info for {{ pgfga_osuser }}
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ pgfga_osuser }}"
+    split: ":"
+
+- name: "~/.postgresql dir"
+  ansible.builtin.file:
+    path: "{{ getent_passwd[pgfga_osuser][4] }}/.postgresql"
+    state: directory
+    owner: "{{ pgfga_osuser }}"
+    group: "{{ pgfga_osgroup }}"
+    mode: "0750"
+
+- name: "Deploy certs to ~/.postgresql/"
+  ansible.builtin.copy:
+    dest: "{{ getent_passwd[pgfga_osuser][4] }}/.postgresql/{{ item.name }}"
+    owner: "{{ pgfga_osuser }}"
+    group: "{{ pgfga_osgroup }}"
+    mode: "{{ item.mode }}"
+    content: "{{ item.content }}"
+  diff: false
+  loop:
+    - name: root.crt
+      mode: "0640"
+      content: "{{ certs.client.postgres }}"
+    - name: "postgresql.crt"
+      mode: "0640"
+      content: "{{ certs.client.pgfga }}"
+    - name: "postgresql.key"
+      mode: "0600"
+      content: "{{ private_keys.client.pgfga }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: pgfga_cert_managed
+
+- name: Create deploydir and configdir
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ pgfga_deploydir }}"
+    - "{{ pgfga_configdir }}"
+
+- name: Copy rpm
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/tmp"
+    mode: "0600"
+  loop: "{{ pgfga_local_packages }}"
+
+- name: Install pgfga
+  ansible.builtin.dnf:
+    name: "/tmp/{{ item }}"
+    disable_gpg_check: "true"
+    state: "{{ pgfga_package_state }}"
+  loop: "{{ pgfga_local_packages }}"
+
+- name: Install pgfga
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    disable_gpg_check: "true"
+    state: "{{ pgfga_package_state }}"
+  loop: "{{ pgfga_packages }}"

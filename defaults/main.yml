@@ -1,0 +1,24 @@
+---
+pgfga_deploydir: /usr/local/bin
+pgfga_configdir: /etc/pgfga
+pgfga_osuser: pgfga
+
+pgfga_osgroup: pgfga
+pgfga_pguser: pgfga
+
+pgfga_package_state: present
+pgfga_packages:
+  - pgfga
+pgfga_local_packages: []
+
+pgfga_cert_managed: false
+pgfga_certs:
+  root: |
+    ---
+  client:
+    cert: |
+      ---
+    key: |
+      ---
+
+pgfga_config: {}
