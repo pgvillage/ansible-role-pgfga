@@ -1,7 +1,10 @@
 ---
 galaxy_info:
   author: S. Mannem
-  description: CTO
+  description: |
+    PgFga is a tool to manage PostgreSQL resources, such as databases, extensions, users and roles.
+    One of the fine things is that PgFga can manage users from LDAP groups.
+
   company: Nibble-IT
 
   # If the issue tracker for your role is not on github, uncomment the
