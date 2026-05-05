@@ -1,5 +1,7 @@
 ---
 galaxy_info:
+  namespace: pgvillage
+  role_name: pgfga
   author: S. Mannem
   description: |
     PgFga is a tool to manage PostgreSQL resources, such as databases, extensions, users and roles.
