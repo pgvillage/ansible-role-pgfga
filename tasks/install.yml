@@ -68,13 +68,11 @@
 - name: Install pgfga
   ansible.builtin.package:
     name: "/tmp/{{ item }}"
-    disable_gpg_check: "true"
     state: "{{ pgfga_package_state }}"
   loop: "{{ pgfga_local_packages }}"
 
 - name: Install pgfga
   ansible.builtin.package:
     name: "{{ item }}"
-    disable_gpg_check: "true"
     state: "{{ pgfga_package_state }}"
   loop: "{{ pgfga_packages }}"
