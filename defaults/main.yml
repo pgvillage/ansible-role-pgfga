@@ -1,15 +1,30 @@
 ---
+# Directory that is created to hold the pgfga binary.
 pgfga_deploydir: /usr/local/bin
+# Directory that holds the pgfga configuration file (config.yaml).
 pgfga_configdir: /etc/pgfga
+# OS user that pgfga runs as. Created as a system user with a home directory.
+# Client certificates are deployed to ~/.postgresql of this user.
 pgfga_osuser: pgfga
-
+# Primary OS group of pgfga_osuser. Created as a system group.
 pgfga_osgroup: pgfga
 
+# State of the pgfga packages (e.g. present, latest, absent).
 pgfga_package_state: present
+# List of packages to install from configured package repositories.
 pgfga_packages:
   - pgfga
+# List of local package files (relative to the role's files dir or absolute paths
+# on the controller) that are copied to /tmp on the target and installed from there.
 pgfga_local_packages: []
 
+# When true, deploy client certificates to ~/.postgresql of pgfga_osuser:
+# - root.crt from `certs.client.postgres`
+# - postgresql.crt from `certs.client.pgfga`
+# - postgresql.key from `private_keys.client.pgfga`
+# These variables must then be defined elsewhere (e.g. in group_vars).
 pgfga_cert_managed: false
 
+# pgfga configuration. Rendered as YAML into {{ pgfga_configdir }}/config.yaml.
+# See the pgfga documentation for the supported structure.
 pgfga_config: {}
