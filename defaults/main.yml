@@ -1,6 +1,6 @@
 ---
 # Directory that is created to hold the pgfga binary.
-pgfga_deploydir: /usr/local/bin
+pgfga_deploydir: /usr/bin
 # Directory that holds the pgfga configuration file (config.yaml).
 pgfga_configdir: /etc/pgfga
 # OS user that pgfga runs as. Created as a system user with a home directory.
