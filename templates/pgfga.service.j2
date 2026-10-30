@@ -1,12 +1,12 @@
 [Unit]
-Description=Postgres Router API for HAProxy
+Description=Postgres Fine Grained Access
 After=network.target
 
 [Service]
-ExecStart={{pgroute66_deploydir}}/pgroute66 -c "{{pgroute66_configdir}}/config.yaml"
+ExecStart={{ pgfga_deploydir }}/pgfga -c "{{ pgfga_configdir }}/config.yaml"
 KillMode=mixed
 Type=exec
-User=pgroute66
+User={{ pgfga_osuser }}
 
 [Install]
 WantedBy=multi-user.target
