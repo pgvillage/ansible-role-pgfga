@@ -7,7 +7,7 @@ Defaults are defined in [`defaults/main.yml`](../defaults/main.yml).
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `pgfga_deploydir` | `/usr/local/bin` | Directory for the pgfga binary |
+| `pgfga_deploydir` | `/usr/bin` | Directory for the pgfga binary |
 | `pgfga_configdir` | `/etc/pgfga` | Directory for the pgfga configuration file |
 | `pgfga_osuser` | `pgfga` | OS user that runs pgfga |
 | `pgfga_osgroup` | `pgfga` | Primary group of `pgfga_osuser` |
@@ -22,7 +22,7 @@ Defaults are defined in [`defaults/main.yml`](../defaults/main.yml).
 ### `pgfga_deploydir`
 
 - **Type:** string
-- **Default:** `/usr/local/bin`
+- **Default:** `/usr/bin`
 
 Directory that is created to hold the pgfga binary.
 
