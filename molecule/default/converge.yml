@@ -1,0 +1,24 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    pgfga_config:
+      general:
+        loglevel: debug
+      postgresql_dsn:
+        host: /var/run/postgresql
+        user: pgfga
+        dbname: postgres
+      databases:
+        appdb:
+          owner: appowner
+      roles:
+        app_readers: {}
+      users:
+        app_user:
+          auth: password
+          password: app-secret
+          memberof:
+            - app_readers
+  roles:
+    - role: pgvillage.pgfga

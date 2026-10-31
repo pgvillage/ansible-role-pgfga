@@ -1,0 +1,53 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    # pgfga applies its config and exits
+    - name: Read the result of the last pgfga run
+      ansible.builtin.systemd:
+        name: pgfga.service
+      register: pgfga_unit
+
+    - name: Check that pgfga ran successfully and is enabled
+      ansible.builtin.assert:
+        that:
+          - pgfga_unit.status.Result == 'success'
+          - pgfga_unit.status.ExecMainStatus == '0'
+          - pgfga_unit.status.UnitFileState == 'enabled'
+        fail_msg: "Result={{ pgfga_unit.status.Result }} ExecMainStatus={{ pgfga_unit.status.ExecMainStatus }} UnitFileState={{ pgfga_unit.status.UnitFileState }}"
+
+    - name: Read the database, roles and memberships from PostgreSQL
+      become: true
+      become_user: postgres
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -Atc
+          - >-
+            select 'db ' || datname || ' ' || pg_get_userbyid(datdba) from pg_database where datname = 'appdb'
+            union all
+            select 'role ' || rolname || ' ' || rolcanlogin || ' ' || (rolpassword is not null)
+              from pg_authid where rolname in ('app_user', 'app_readers', 'appowner')
+            union all
+            select 'member ' || r.rolname || ' ' || m.rolname from pg_auth_members am
+              join pg_roles r on r.oid = am.roleid join pg_roles m on m.oid = am.member
+              where m.rolname = 'app_user'
+      register: objects
+      changed_when: false
+
+    - name: Check that pgfga created them
+      ansible.builtin.assert:
+        that:
+          - "'db appdb appowner' in objects.stdout_lines"
+          - "'role app_user true true' in objects.stdout_lines"
+          - "'role app_readers false false' in objects.stdout_lines"
+          - "'member app_readers app_user' in objects.stdout_lines"
+        fail_msg: "{{ objects.stdout }}"
+
+    - name: Log in as app_user with its password
+      ansible.builtin.command: psql "host=127.0.0.1 dbname=appdb user=app_user" -Atc "select current_user"
+      environment:
+        PGPASSWORD: app-secret
+      register: login
+      changed_when: false
+      failed_when: login.stdout != 'app_user'

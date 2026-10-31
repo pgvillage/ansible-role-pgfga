@@ -14,8 +14,12 @@
     mode: "0644"
 
 # Restart kan wel met pgfga
+# pgfga applies its config and exits, so it runs on every converge (and is not
+# idempotent by design: molecule skips it in its idempotence check)
 - name: "Start pgfga service"
   become: true
+  tags:
+    - molecule-idempotence-notest
   ansible.builtin.systemd:
     name: pgfga.service
     state: restarted
