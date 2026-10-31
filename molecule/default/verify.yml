@@ -14,7 +14,9 @@
           - pgfga_unit.status.Result == 'success'
           - pgfga_unit.status.ExecMainStatus == '0'
           - pgfga_unit.status.UnitFileState == 'enabled'
-        fail_msg: "Result={{ pgfga_unit.status.Result }} ExecMainStatus={{ pgfga_unit.status.ExecMainStatus }} UnitFileState={{ pgfga_unit.status.UnitFileState }}"
+        fail_msg: >-
+          Result={{ pgfga_unit.status.Result }} ExecMainStatus={{ pgfga_unit.status.ExecMainStatus }}
+          UnitFileState={{ pgfga_unit.status.UnitFileState }}
 
     - name: Read the database, roles and memberships from PostgreSQL
       become: true
