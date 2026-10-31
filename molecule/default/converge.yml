@@ -18,9 +18,6 @@
         app_user:
           auth: password
           password: app-secret
-          # pgfga only sets the password when LOGIN is in the options
-          options:
-            - LOGIN
           memberof:
             - app_readers
   roles:

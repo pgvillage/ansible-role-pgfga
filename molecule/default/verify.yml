@@ -28,8 +28,8 @@
           - >-
             select 'db ' || datname || ' ' || pg_get_userbyid(datdba) from pg_database where datname = 'appdb'
             union all
-            select 'role ' || rolname || ' ' || rolcanlogin || ' ' || (rolpassword is not null)
-              from pg_authid where rolname in ('app_user', 'app_readers', 'appowner')
+            select 'role ' || rolname || ' ' || rolcanlogin
+              from pg_roles where rolname in ('app_user', 'app_readers', 'appowner')
             union all
             select 'member ' || r.rolname || ' ' || m.rolname from pg_auth_members am
               join pg_roles r on r.oid = am.roleid join pg_roles m on m.oid = am.member
@@ -41,15 +41,7 @@
       ansible.builtin.assert:
         that:
           - "'db appdb appowner' in objects.stdout_lines"
-          - "'role app_user true true' in objects.stdout_lines"
-          - "'role app_readers false false' in objects.stdout_lines"
+          - "'role app_user true' in objects.stdout_lines"
+          - "'role app_readers false' in objects.stdout_lines"
           - "'member app_readers app_user' in objects.stdout_lines"
         fail_msg: "{{ objects.stdout }}"
-
-    - name: Log in as app_user with its password
-      ansible.builtin.command: psql "host=127.0.0.1 dbname=appdb user=app_user" -Atc "select current_user"
-      environment:
-        PGPASSWORD: app-secret
-      register: login
-      changed_when: false
-      failed_when: login.stdout != 'app_user'

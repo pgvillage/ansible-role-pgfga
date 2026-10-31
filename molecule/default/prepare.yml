@@ -25,17 +25,6 @@
       args:
         creates: /var/lib/pgsql/data/PG_VERSION
 
-    # pgfga stores passwords as md5 hashes, so password logins over TCP use md5
-    - name: Allow peer logins locally, and md5 password logins on localhost
-      ansible.builtin.copy:
-        dest: /var/lib/pgsql/data/pg_hba.conf
-        content: |
-          local all all peer
-          host all all 127.0.0.1/32 md5
-        owner: postgres
-        group: postgres
-        mode: "0600"
-
     - name: Start PostgreSQL
       ansible.builtin.systemd:
         name: postgresql
