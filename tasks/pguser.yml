@@ -1,31 +1,29 @@
 ---
 # pgfga logs in over the unix socket as pgfga_pg_user (ident). Create that role as a superuser, as the PostgreSQL OS
-# user, when it doesn't exist yet. On a standby the role comes from the primary, so nothing is created there.
-- name: Check whether the PostgreSQL user of pgfga exists, and whether this is a standby
+# user. On a standby the role comes from the primary, so nothing is created there.
+- name: Install psycopg, for the community.postgresql modules
+  ansible.builtin.package:
+    name: "{{ pgfga_python_packages }}"
+    state: present
+
+- name: Check whether PostgreSQL is a standby
   become: true
   become_user: "{{ pgfga_pg_admin_osuser }}"
-  ansible.builtin.command:
-    argv:
-      - psql
-      - "host={{ pgfga_pg_host }} port={{ pgfga_pg_port }} dbname={{ pgfga_pg_dbname }}"
-      - --no-align
-      - --tuples-only
-      - --command
-      - >-
-        select exists (select from pg_roles where rolname = {{ pgfga_pg_user | to_json | replace('"', "'") }}),
-        pg_is_in_recovery()
-  register: pgfga_pg_user_state
+  community.postgresql.postgresql_query:
+    login_unix_socket: "{{ pgfga_pg_host }}"
+    login_port: "{{ pgfga_pg_port }}"
+    login_db: "{{ pgfga_pg_dbname }}"
+    query: select pg_is_in_recovery() as standby
+  register: pgfga_pg_recovery
   changed_when: false
 
 - name: Create the PostgreSQL user of pgfga (LOGIN SUPERUSER)
   become: true
   become_user: "{{ pgfga_pg_admin_osuser }}"
-  ansible.builtin.command:
-    argv:
-      - psql
-      - "host={{ pgfga_pg_host }} port={{ pgfga_pg_port }} dbname={{ pgfga_pg_dbname }}"
-      - --set=ON_ERROR_STOP=1
-      - --command
-      - "create role {{ pgfga_pg_user | to_json }} login superuser"
-  when: pgfga_pg_user_state.stdout == 'f|f'
-  changed_when: true
+  community.postgresql.postgresql_user:
+    name: "{{ pgfga_pg_user }}"
+    role_attr_flags: LOGIN,SUPERUSER
+    login_unix_socket: "{{ pgfga_pg_host }}"
+    login_port: "{{ pgfga_pg_port }}"
+    login_db: "{{ pgfga_pg_dbname }}"
+  when: not pgfga_pg_recovery.query_result[0].standby

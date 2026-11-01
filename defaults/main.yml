@@ -35,9 +35,17 @@ pgfga_pg_host: /var/run/postgresql
 pgfga_pg_port: 5432
 # Database pgfga connects to.
 pgfga_pg_dbname: postgres
-# Create pgfga_pg_user (LOGIN SUPERUSER) when it doesn't exist. It is created as pgfga_pg_admin_osuser over the unix
-# socket, and skipped on a standby (the role is replicated from the primary).
+# Create pgfga_pg_user (LOGIN SUPERUSER) with community.postgresql.postgresql_user, as pgfga_pg_admin_osuser over the
+# unix socket. Skipped on a standby (the role is replicated from the primary).
 pgfga_pg_create_user: true
+# Python packages the community.postgresql modules need on the host (psycopg), per package manager
+# (`default` when the package manager is not listed). Installed when pgfga_pg_create_user is true.
+pgfga_python_packages: "{{ _pgfga_python_packages.get(ansible_facts.pkg_mgr, _pgfga_python_packages.default) }}"
+_pgfga_python_packages:
+  default:
+    - python3-psycopg2
+  zypper:
+    - python313-psycopg2
 # OS user that can create roles in PostgreSQL over the unix socket (peer authentication as a superuser).
 pgfga_pg_admin_osuser: postgres
 # Default pgfga configuration: the connection above. pgfga_config is merged over it.

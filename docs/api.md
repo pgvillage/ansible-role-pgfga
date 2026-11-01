@@ -116,8 +116,8 @@ private_keys:
 pgfga runs as `pgfga_osuser` and connects to PostgreSQL over the unix socket as `pgfga_pg_user`, with ident (peer)
 authentication: no password is needed. The PostgreSQL user has the same name as the OS user, so a
 `local all all ident` (or `peer`) entry in `pg_hba.conf` lets it in. The role creates that user (`LOGIN SUPERUSER`)
-when it doesn't exist, as `pgfga_pg_admin_osuser` over the socket; on a standby it creates nothing (the user comes from
-the primary).
+with `community.postgresql.postgresql_user`, as `pgfga_pg_admin_osuser` over the socket; on a standby it creates
+nothing (the user comes from the primary). The module needs psycopg on the host (`pgfga_python_packages`).
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -127,6 +127,7 @@ the primary).
 | `pgfga_pg_dbname` | `postgres` | Database pgfga connects to. |
 | `pgfga_pg_create_user` | `true` | Create `pgfga_pg_user` when it doesn't exist. |
 | `pgfga_pg_admin_osuser` | `postgres` | OS user that creates `pgfga_pg_user` (a PostgreSQL superuser over peer authentication). |
+| `pgfga_python_packages` | `python3-psycopg2` (`python313-psycopg2` on zypper) | psycopg for the `community.postgresql` modules, installed when `pgfga_pg_create_user` is true. |
 | `pgfga_default_config` | `postgresql_dsn` from the variables above | Default pgfga configuration; `pgfga_config` is merged over it. |
 
 ## Configuration
