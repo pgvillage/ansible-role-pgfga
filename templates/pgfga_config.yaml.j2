@@ -1,1 +1,1 @@
-{{ pgfga_config | to_nice_yaml }}
+{{ pgfga_default_config | combine(pgfga_config, recursive=True) | to_nice_yaml }}

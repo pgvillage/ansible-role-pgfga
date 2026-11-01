@@ -111,6 +111,25 @@ private_keys:
     pgfga: "{{ lookup('file', 'pgfga.key') }}"
 ```
 
+## PostgreSQL login
+
+pgfga runs as `pgfga_osuser` and connects to PostgreSQL over the unix socket as `pgfga_pg_user`, with ident (peer)
+authentication: no password is needed. The PostgreSQL user has the same name as the OS user, so a
+`local all all ident` (or `peer`) entry in `pg_hba.conf` lets it in. The role creates that user (`LOGIN SUPERUSER`)
+with `community.postgresql.postgresql_user`, as `pgfga_pg_admin_osuser` over the socket; on a standby it creates
+nothing (the user comes from the primary). The module needs psycopg on the host (`pgfga_python_packages`).
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `pgfga_pg_user` | `{{ pgfga_osuser }}` | PostgreSQL user pgfga logs in as. |
+| `pgfga_pg_host` | `/var/run/postgresql` | Unix socket directory of PostgreSQL (e.g. `/tmp` for stolon in PgVillage). |
+| `pgfga_pg_port` | `5432` | Port of PostgreSQL. |
+| `pgfga_pg_dbname` | `postgres` | Database pgfga connects to. |
+| `pgfga_pg_create_user` | `true` | Create `pgfga_pg_user` when it doesn't exist. |
+| `pgfga_pg_admin_osuser` | `postgres` | OS user that creates `pgfga_pg_user` (a PostgreSQL superuser over peer authentication). |
+| `pgfga_python_packages` | `python3-psycopg2` (`python313-psycopg2` on zypper) | psycopg for the `community.postgresql` modules, installed when `pgfga_pg_create_user` is true. |
+| `pgfga_default_config` | `postgresql_dsn` from the variables above | Default pgfga configuration; `pgfga_config` is merged over it. |
+
 ## Configuration
 
 ### `pgfga_config`
@@ -118,6 +137,7 @@ private_keys:
 - **Type:** dictionary
 - **Default:** `{}`
 
-The pgfga configuration. It is rendered as YAML (via `to_nice_yaml`) into
+The pgfga configuration (databases, roles, users, ...). It is merged recursively over `pgfga_default_config` (the
+connection, see [PostgreSQL login](#postgresql-login)) and rendered as YAML (via `to_nice_yaml`) into
 `{{ pgfga_configdir }}/config.yaml`. See the pgfga documentation for the supported structure.
 After the configuration is deployed, the `pgfga` systemd service is (re)started and enabled.
