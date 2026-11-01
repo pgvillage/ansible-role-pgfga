@@ -25,6 +25,28 @@ pgfga_local_packages: []
 # These variables must then be defined elsewhere (e.g. in group_vars).
 pgfga_cert_managed: false
 
-# pgfga configuration. Rendered as YAML into {{ pgfga_configdir }}/config.yaml.
-# See the pgfga documentation for the supported structure.
+# PostgreSQL login of pgfga: pgfga runs as pgfga_osuser and connects over the unix socket as pgfga_pg_user, with
+# ident (peer) authentication, so no password is needed. pgfga_pg_user has the same name as pgfga_osuser, so the
+# default `local all all ident` / `peer` pg_hba entry lets it in.
+pgfga_pg_user: "{{ pgfga_osuser }}"
+# Unix socket directory of PostgreSQL (e.g. /tmp for stolon in PgVillage).
+pgfga_pg_host: /var/run/postgresql
+# Port of PostgreSQL.
+pgfga_pg_port: 5432
+# Database pgfga connects to.
+pgfga_pg_dbname: postgres
+# Create pgfga_pg_user (LOGIN SUPERUSER) when it doesn't exist. It is created as pgfga_pg_admin_osuser over the unix
+# socket, and skipped on a standby (the role is replicated from the primary).
+pgfga_pg_create_user: true
+# OS user that can create roles in PostgreSQL over the unix socket (peer authentication as a superuser).
+pgfga_pg_admin_osuser: postgres
+# Default pgfga configuration: the connection above. pgfga_config is merged over it.
+pgfga_default_config:
+  postgresql_dsn:
+    host: "{{ pgfga_pg_host }}"
+    port: "{{ pgfga_pg_port | string }}"
+    user: "{{ pgfga_pg_user }}"
+    dbname: "{{ pgfga_pg_dbname }}"
+# pgfga configuration: databases, roles, users, etc. Merged (recursively) over pgfga_default_config and rendered as YAML
+# into {{ pgfga_configdir }}/config.yaml. See the pgfga documentation for the supported structure.
 pgfga_config: {}

@@ -1,5 +1,8 @@
 ---
 - name: Install
   ansible.builtin.include_tasks: "install.yml"
+- name: Create the PostgreSQL user of pgfga
+  ansible.builtin.include_tasks: "pguser.yml"
+  when: pgfga_pg_create_user | bool
 - name: Configure
   ansible.builtin.include_tasks: "config.yml"

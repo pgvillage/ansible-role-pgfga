@@ -2,13 +2,10 @@
 - name: Converge
   hosts: all
   vars:
+    # The connection (socket, user pgfga, ident) comes from pgfga_default_config
     pgfga_config:
       general:
         loglevel: debug
-      postgresql_dsn:
-        host: /var/run/postgresql
-        user: pgfga
-        dbname: postgres
       databases:
         appdb:
           owner: appowner

@@ -45,3 +45,31 @@
           - "'role app_readers false' in objects.stdout_lines"
           - "'member app_readers app_user' in objects.stdout_lines"
         fail_msg: "{{ objects.stdout }}"
+
+    - name: Read the PostgreSQL user of pgfga, created by the role
+      become: true
+      become_user: postgres
+      ansible.builtin.command: psql -Atc "select rolname, rolsuper, rolcanlogin from pg_roles where rolname = 'pgfga'"
+      register: pgfga_role
+      changed_when: false
+
+    - name: Check that the role created it as a superuser that can log in
+      ansible.builtin.assert:
+        that: pgfga_role.stdout == 'pgfga|t|t'
+        fail_msg: "{{ pgfga_role.stdout }}"
+
+    - name: Read the deployed pgfga configuration
+      ansible.builtin.slurp:
+        src: /etc/pgfga/config.yaml
+      register: pgfga_config_file
+
+    - name: Check that pgfga connects over the socket as pgfga
+      ansible.builtin.assert:
+        that:
+          - dsn.host == '/var/run/postgresql'
+          - dsn.port == '5432'
+          - dsn.user == 'pgfga'
+          - dsn.dbname == 'postgres'
+        fail_msg: "{{ dsn }}"
+      vars:
+        dsn: "{{ (pgfga_config_file.content | b64decode | from_yaml).postgresql_dsn }}"
