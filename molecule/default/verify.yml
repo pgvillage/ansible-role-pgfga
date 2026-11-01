@@ -67,9 +67,9 @@
       ansible.builtin.assert:
         that:
           - dsn.host == '/var/run/postgresql'
-          - dsn.port == '5432'
+          - dsn.port | string == '5432'
           - dsn.user == 'pgfga'
           - dsn.dbname == 'postgres'
-        fail_msg: "{{ dsn }}"
+        fail_msg: "{{ dsn | to_json }}"
       vars:
         dsn: "{{ (pgfga_config_file.content | b64decode | from_yaml).postgresql_dsn }}"

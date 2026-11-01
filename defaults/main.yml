@@ -44,7 +44,7 @@ pgfga_pg_admin_osuser: postgres
 pgfga_default_config:
   postgresql_dsn:
     host: "{{ pgfga_pg_host }}"
-    port: "{{ pgfga_pg_port | string }}"
+    port: "{{ pgfga_pg_port }}"
     user: "{{ pgfga_pg_user }}"
     dbname: "{{ pgfga_pg_dbname }}"
 # pgfga configuration: databases, roles, users, etc. Merged (recursively) over pgfga_default_config and rendered as YAML
