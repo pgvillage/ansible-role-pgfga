@@ -127,7 +127,7 @@ nothing (the user comes from the primary). The module needs psycopg on the host 
 | `pgfga_pg_dbname` | `postgres` | Database pgfga connects to. |
 | `pgfga_pg_create_user` | `true` | Create `pgfga_pg_user` when it doesn't exist. |
 | `pgfga_pg_admin_osuser` | `postgres` | OS user that creates `pgfga_pg_user` (a PostgreSQL superuser over peer authentication). |
-| `pgfga_python_packages` | `python3-psycopg2` (`python313-psycopg2` on zypper) | psycopg for the `community.postgresql` modules, installed when `pgfga_pg_create_user` is true. |
+| `pgfga_python_packages` | `python3-psycopg2` (`python313-psycopg2` on zypper) | psycopg for the `community.postgresql` modules, installed when `pgfga_pg_create_user` is true. Built from `_pgfga_python_packages` in [vars/main.yml](../vars/main.yml) (internal; an inventory can't override it, set `pgfga_python_packages` instead). |
 | `pgfga_default_config` | `postgresql_dsn` from the variables above | Default pgfga configuration; `pgfga_config` is merged over it. |
 
 ## Configuration
