@@ -1,0 +1,10 @@
+---
+# vars file for pgfga
+
+# Internal: psycopg packages per package manager (`default` when the package manager is not listed), used to derive
+# pgfga_python_packages. Role variable, so an inventory can't override it: set pgfga_python_packages instead.
+_pgfga_python_packages:
+  default:
+    - python3-psycopg2
+  zypper:
+    - python313-psycopg2
