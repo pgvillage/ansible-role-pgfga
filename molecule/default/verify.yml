@@ -73,3 +73,35 @@
         fail_msg: "{{ dsn | to_json }}"
       vars:
         dsn: "{{ (pgfga_config_file.content | b64decode | from_yaml).postgresql_dsn }}"
+
+# An old package installed pgfga in /usr/local/bin, while the unit points to
+# pgfga_deploydir (/usr/bin). Simulate that by moving the binary away: the
+# install tasks must fail with a clear message.
+- name: Verify the failure when the pgfga binary is missing
+  hosts: all
+  tasks:
+    - name: Move the pgfga binary away, as if an old package put it in /usr/local/bin
+      ansible.builtin.command: mv /usr/bin/pgfga /usr/local/bin/pgfga
+      changed_when: true
+
+    - name: Run the install tasks with the binary missing
+      block:
+        - name: Run the install tasks of the role
+          ansible.builtin.include_role:
+            name: pgvillage.pgfga
+            tasks_from: install.yml
+
+        - name: The role should have failed
+          ansible.builtin.fail:
+            msg: The role did not fail on the missing pgfga binary
+      rescue:
+        - name: Check the failure message
+          ansible.builtin.assert:
+            that:
+              - "'/usr/bin/pgfga does not exist' in ansible_failed_result.msg"
+              - "'pgfga_package_state: latest' in ansible_failed_result.msg"
+            fail_msg: "{{ ansible_failed_result.msg }}"
+      always:
+        - name: Put the pgfga binary back
+          ansible.builtin.command: mv /usr/local/bin/pgfga /usr/bin/pgfga
+          changed_when: true

@@ -1,5 +1,8 @@
 ---
-# Directory that is created to hold the pgfga binary.
+# Directory that is created to hold the pgfga binary (used in the systemd unit).
+# The role fails early when the binary is not there (e.g. an old package with
+# pgfga in /usr/local/bin and `present`): then set pgfga_package_state: latest
+# once, or pgfga_deploydir: /usr/local/bin.
 pgfga_deploydir: /usr/bin
 # Directory that holds the pgfga configuration file (config.yaml).
 pgfga_configdir: /etc/pgfga

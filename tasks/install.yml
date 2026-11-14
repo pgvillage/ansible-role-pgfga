@@ -70,9 +70,36 @@
     name: "/tmp/{{ item }}"
     state: "{{ pgfga_package_state }}"
   loop: "{{ pgfga_local_packages }}"
+  register: pgfga_local_package_installed
 
 - name: Install pgfga
   ansible.builtin.package:
     name: "{{ item }}"
     state: "{{ pgfga_package_state }}"
   loop: "{{ pgfga_packages }}"
+  register: pgfga_package_installed
+
+# Older pgvillage packages installed pgfga in /usr/local/bin, newer ones in
+# /usr/bin. With `present` an old package stays, and the unit would point to a
+# binary that is not there: fail before the unit and config change.
+- name: Check that the pgfga binary exists
+  ansible.builtin.stat:
+    path: "{{ pgfga_deploydir }}/pgfga"
+  register: pgfga_binary
+  when:
+    - pgfga_package_state != 'absent'
+    - (pgfga_packages + pgfga_local_packages) | length > 0
+
+- name: Fail when the pgfga binary is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ pgfga_deploydir }}/pgfga does not exist after installing the pgfga
+      packages (state {{ pgfga_package_state }}).
+      Older pgvillage packages install pgfga in /usr/local/bin.
+      Set pgfga_package_state: latest (once) to move to the new package,
+      or set pgfga_deploydir: /usr/local/bin to keep the old build.
+  when:
+    - pgfga_binary is not skipped
+    - not pgfga_binary.stat.exists
+    # In check mode a package that is not installed yet has no binary
+    - not (ansible_check_mode and (pgfga_package_installed is changed or pgfga_local_package_installed is changed))
