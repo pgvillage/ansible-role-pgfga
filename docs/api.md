@@ -7,7 +7,7 @@ Defaults are defined in [`defaults/main.yml`](../defaults/main.yml).
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `pgfga_deploydir` | `/usr/bin` | Directory for the pgfga binary |
+| `pgfga_deploydir` | `/usr/bin` | Directory for the pgfga binary (used in the systemd unit) |
 | `pgfga_configdir` | `/etc/pgfga` | Directory for the pgfga configuration file |
 | `pgfga_osuser` | `pgfga` | OS user that runs pgfga |
 | `pgfga_osgroup` | `pgfga` | Primary group of `pgfga_osuser` |
@@ -25,6 +25,12 @@ Defaults are defined in [`defaults/main.yml`](../defaults/main.yml).
 - **Default:** `/usr/bin`
 
 Directory that is created to hold the pgfga binary.
+The systemd unit runs `<pgfga_deploydir>/pgfga`.
+
+When the role installs packages (state not `absent`) and `<pgfga_deploydir>/pgfga` does not exist
+afterwards, the role fails before it changes the unit and config. Older pgvillage packages installed
+pgfga in `/usr/local/bin`: set `pgfga_package_state: latest` once to move to the new package, or set
+`pgfga_deploydir: /usr/local/bin` to keep the old build.
 
 ### `pgfga_configdir`
 
